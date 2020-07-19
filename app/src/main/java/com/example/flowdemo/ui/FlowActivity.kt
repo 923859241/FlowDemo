@@ -9,9 +9,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.activity_main.*
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -20,20 +17,24 @@ import com.example.flowdemo.R
 import com.example.flowdemo.presenter.ApiFlowPresenter
 import com.example.flowdemo.viewmodel.ApiDataBean
 
-abstract class FlowActivity : AppCompatActivity(),ActivityView{
+class FlowActivity : AppCompatActivity(),ActivityView{
 
     lateinit var presenter:ApiFlowPresenter
 
     var DataInfolist: MutableList<ApiDataBean> = mutableListOf<ApiDataBean>()
     lateinit var targetAdapter:DataAdapter
+    init {
+        //双向观察
+        presenter= ApiFlowPresenter.createPresenter(lifecycle)
+        lifecycle.addObserver(presenter)
+        presenter.onTakeView(this)
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.flow_view)
-        //双向观察
-        presenter= ApiFlowPresenter.createPresenter(lifecycle)
-        lifecycle.addObserver(presenter)
+
 
         val targetRecyclerView = findViewById<RecyclerView>(R.id.FlowRecyclerview)
         targetAdapter = DataAdapter(this,DataInfolist)
@@ -44,8 +45,8 @@ abstract class FlowActivity : AppCompatActivity(),ActivityView{
     }
 
 
-    class DataAdapter(private val context: Context, private val dataList:List<ApiDataBean>) :
-            RecyclerView.Adapter<DataViewHolder>(){
+    class DataAdapter(private val context: Context, private var dataList:MutableList<ApiDataBean>) :
+        RecyclerView.Adapter<DataViewHolder>(){
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataViewHolder {
             val view = LayoutInflater.from(context).inflate(R.layout.flow_view_item,parent,false)
@@ -68,7 +69,11 @@ abstract class FlowActivity : AppCompatActivity(),ActivityView{
             }
             holder.describeText.text = targetData.describe
             holder.nameText.text = targetData.name
-
+        }
+        fun dataFresh(infoList: List<ApiDataBean>){
+            dataList.clear()
+            dataList.addAll(infoList)
+            notifyDataSetChanged()
         }
 
     }
@@ -81,10 +86,11 @@ abstract class FlowActivity : AppCompatActivity(),ActivityView{
 
 
     override fun replayFlowData(infoList: List<ApiDataBean>) {
-        DataInfolist.clear()
-        DataInfolist.addAll(infoList)
-
-        targetAdapter.notifyDataSetChanged()
+        //runOnUiThread{
+            DataInfolist.clear()
+            DataInfolist.addAll(infoList)
+            targetAdapter.dataFresh(infoList)
+        //}
     }
 
 }
