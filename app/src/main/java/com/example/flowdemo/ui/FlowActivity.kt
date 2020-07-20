@@ -31,10 +31,10 @@ class FlowActivity : AppCompatActivity(),ActivityView{
     var DataInfolist: MutableList<ApiDataBean> = mutableListOf<ApiDataBean>()
     lateinit var targetAdapter:DataAdapter
     init {
-        //双向观察
+/*        //双向观察
         presenter= ApiFlowPresenter.createPresenter(lifecycle)
         lifecycle.addObserver(presenter)
-        presenter.onTakeView(this)
+        presenter.onTakeView(this)*/
 
     }
 
@@ -51,7 +51,7 @@ class FlowActivity : AppCompatActivity(),ActivityView{
         targetRecyclerView.adapter = targetAdapter
         targetRecyclerView.layoutManager = targetManager
 
-/*        //viewModel的形式
+        //viewModel的形式
         val viewFactory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         viewModel = ViewModelProvider(this, viewFactory).get(ApiViewModel::class.java)
         //创建观察者
@@ -61,7 +61,7 @@ class FlowActivity : AppCompatActivity(),ActivityView{
         //观察LiveData，将此活动作为LifecycleOwner和observer传递进来。
         viewModel.liveData.observe(this,dataObserver)
         //开始加载
-        viewModel.getData()*/
+        viewModel.getData()
 
     }
 
