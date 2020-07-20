@@ -9,17 +9,24 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
 import com.example.flowdemo.R
 import com.example.flowdemo.presenter.ApiFlowPresenter
 import com.example.flowdemo.viewmodel.ApiDataBean
+import com.example.flowdemo.viewmodel.ApiViewModel
+
 
 class FlowActivity : AppCompatActivity(),ActivityView{
 
     lateinit var presenter:ApiFlowPresenter
+    lateinit var viewModel:ApiViewModel
+
+    var mLiveData = MutableLiveData<List<ApiDataBean>>()
 
     var DataInfolist: MutableList<ApiDataBean> = mutableListOf<ApiDataBean>()
     lateinit var targetAdapter:DataAdapter
@@ -28,6 +35,7 @@ class FlowActivity : AppCompatActivity(),ActivityView{
         presenter= ApiFlowPresenter.createPresenter(lifecycle)
         lifecycle.addObserver(presenter)
         presenter.onTakeView(this)
+
     }
 
 
@@ -42,6 +50,19 @@ class FlowActivity : AppCompatActivity(),ActivityView{
             StaggeredGridLayoutManager.VERTICAL)
         targetRecyclerView.adapter = targetAdapter
         targetRecyclerView.layoutManager = targetManager
+
+/*        //viewModel的形式
+        val viewFactory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        viewModel = ViewModelProvider(this, viewFactory).get(ApiViewModel::class.java)
+        //创建观察者
+        val dataObserver = Observer<List<ApiDataBean>> {
+            replayFlowData(it)
+        }
+        //观察LiveData，将此活动作为LifecycleOwner和observer传递进来。
+        viewModel.liveData.observe(this,dataObserver)
+        //开始加载
+        viewModel.getData()*/
+
     }
 
 
@@ -87,9 +108,9 @@ class FlowActivity : AppCompatActivity(),ActivityView{
 
     override fun replayFlowData(infoList: List<ApiDataBean>) {
         //runOnUiThread{
-            DataInfolist.clear()
-            DataInfolist.addAll(infoList)
-            targetAdapter.dataFresh(infoList)
+        DataInfolist.clear()
+        DataInfolist.addAll(infoList)
+        targetAdapter.dataFresh(infoList)
         //}
     }
 
